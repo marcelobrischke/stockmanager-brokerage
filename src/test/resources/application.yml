@@ -1,0 +1,25 @@
+spring:
+    application:
+        name: stockmanager-brokerage
+    jackson.serialization:
+        indent_output: true
+    datasource:
+        hikari:
+            connectionTimeout: 20000
+            maximumPoolSize: 5
+        url: jdbc:h2:~/brokerage;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE
+    jpa:
+        show-sql: true
+        hibernate:
+            ddl-auto: update
+server:
+    port: 8081
+eureka:
+    client:
+         serviceUrl:
+             defaultZone: http://localhost:8761/eureka
+
+logging:
+  level:
+    root: DEBUG
+    org.springframework: INFO
