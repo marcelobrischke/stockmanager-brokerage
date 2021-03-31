@@ -16,7 +16,7 @@ import br.com.mb.stockmanagerbrokerage.domain.invoice.Invoice;
 import br.com.mb.stockmanagerbrokerage.domain.invoice.InvoiceRepository;
 
 @DataJpaTest
-public class InvoiceRepositoryTest {
+class InvoiceRepositoryTest {
 
     @Autowired
     private TestEntityManager entityManager;
@@ -25,7 +25,7 @@ public class InvoiceRepositoryTest {
     private InvoiceRepository repository;
 
     @Test
-    public void testFindByCode() throws ParseException {
+    void testFindByCode() throws ParseException {
 
     	SimpleDateFormat sdfDate = new SimpleDateFormat("dd/MM/yyyy");
         entityManager.persist(new Invoice("test", sdfDate.parse("01/01/2017"), "BUY", "TEST3", 2896, new BigDecimal("24.69")));

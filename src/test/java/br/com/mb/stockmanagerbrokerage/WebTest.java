@@ -26,7 +26,7 @@ import br.com.mb.stockmanagerbrokerage.domain.invoice.InvoiceDto;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-public class WebTest {
+class WebTest {
 
 	private final SimpleDateFormat sdfDate = new SimpleDateFormat("dd/MM/yyyy");
 	
@@ -34,14 +34,14 @@ public class WebTest {
 	private MockMvc mockMvc;
 
 	@Test
-	public void listAll() throws Exception {
+	void listAll() throws Exception {
 		this.mockMvc.perform(get("/v1/")).andDo(print()).andExpect(status().isOk())
 				.andExpect(content().string(startsWith("[") ))
 				.andExpect(content().string(endsWith("]") ));
 	}
 	
 	@Test
-	public void listByYear() throws Exception {
+	void listByYear() throws Exception {
 		this.mockMvc.perform(get("/v1/filter/year/2020")).andDo(print()).andExpect(status().isOk())
 				.andExpect(content().string(startsWith("[") ))
 				.andExpect(content().string(endsWith("]") ));
@@ -49,7 +49,7 @@ public class WebTest {
 	}
 	
 	@Test
-	public void insert() throws Exception {		
+	void insert() throws Exception {		
 		// given
 		String code = "new";
 		String symbol = "SYMB3";

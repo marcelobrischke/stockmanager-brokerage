@@ -1,6 +1,7 @@
 package br.com.mb.stockmanagerbrokerage.domain.invoice;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
@@ -18,9 +19,9 @@ public class InvoiceService {
 	@Autowired
 	private InvoiceRepository repository;
 
-	public ArrayList<InvoiceDto> listAll() {
+	public List<InvoiceDto> listAll() {
 		Iterable<Invoice> invoices = repository.findAll();
-		ArrayList<InvoiceDto> invoicesDto = new ArrayList<InvoiceDto>();
+		List<InvoiceDto> invoicesDto = new ArrayList<>();
 		for (Invoice invoice : invoices) {
 
 			InvoiceDto invoiceDto = new InvoiceDto(invoice.getCode(), invoice.getOperationDate(),
@@ -40,13 +41,14 @@ public class InvoiceService {
 		//TODO: improve all this methpd code below, it is messy, but works
 		Optional<Invoice> invoiceStored = repository.findByCode(invoiceDto.getCode());
 
-		Invoice invoice = null;
+		Invoice invoice;
 		if (invoiceStored.isPresent()) {
 			log.debug("isPresent, stored:"+ invoiceStored.toString());
 			if (overrideIfExists) {
 				log.debug("will override");
 				BeanUtils.copyProperties(invoiceDto, invoiceStored);
 				invoice = repository.save(invoiceStored.get());
+				return invoiceToDto(invoice);
 			} else {
 				log.debug("return without override");
 				return Optional.empty();
@@ -56,15 +58,11 @@ public class InvoiceService {
 			invoice = new Invoice();
 			BeanUtils.copyProperties(invoiceDto, invoice);
 			invoice = repository.save(invoice);
+			return invoiceToDto(invoice);
 		}
-		
-		return invoiceToDto(invoice);
 	}
 
 	private Optional<InvoiceDto> invoiceToDto(Invoice invoice) {
-		if (invoice == null) {
-			return  Optional.empty();
-		}
 		InvoiceDto invoiceDto = new InvoiceDto(invoice.getCode(), invoice.getOperationDate(),
 				invoice.getOperation(), invoice.getSymbol(), invoice.getQuantity(), invoice.getUnitaryValue());
 		return Optional.of(invoiceDto);

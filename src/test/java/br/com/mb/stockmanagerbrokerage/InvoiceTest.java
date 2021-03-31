@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import br.com.mb.stockmanagerbrokerage.domain.invoice.Invoice;
 
-public class InvoiceTest {
+class InvoiceTest {
 	
 	@Test
-	public void getSetTest() {
+	void getSetTest() {
 		Long id = 3L;
 		String code = "code";
 		Date operationDate = new Date();
