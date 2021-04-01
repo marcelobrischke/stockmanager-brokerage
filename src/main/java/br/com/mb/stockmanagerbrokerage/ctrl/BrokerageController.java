@@ -3,10 +3,12 @@ package br.com.mb.stockmanagerbrokerage.ctrl;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,11 +27,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
 @RequestMapping("/v1")
+@CrossOrigin("*")
 public class BrokerageController {
    
     @Autowired
     private InvoiceService service;
     
+    @RolesAllowed({"stockmanager-users", "stockmanager-admins"})
 	@GetMapping("/")
 	public List<InvoiceDto> listAll(){
 		
@@ -39,6 +43,7 @@ public class BrokerageController {
 		return invoices;
 	}
 	
+    @RolesAllowed({"stockmanager-users", "stockmanager-admins"})
 	@GetMapping("/filter/year/{year}")
 	public List<InvoiceDto> listByYear(@PathVariable Integer year){
 		log.debug("Year: "+ year);
@@ -49,6 +54,7 @@ public class BrokerageController {
 		return invoices;
 	}
 	
+    @RolesAllowed({"stockmanager-users", "stockmanager-admins"})
 	@PostMapping(value = "/")
 	@ResponseStatus(value = HttpStatus.CREATED)
 	public void add(@Valid @RequestBody InvoiceDto invoiceDto){
@@ -59,6 +65,7 @@ public class BrokerageController {
 		}
 	}
 	
+    @RolesAllowed({"stockmanager-users", "stockmanager-admins"})
 	@PutMapping(value = "/")
 	@ResponseStatus(value = HttpStatus.OK)
 	public void overwrite(@Valid @RequestBody InvoiceDto invoiceDto){
@@ -66,6 +73,7 @@ public class BrokerageController {
 		service.storeinvoice(invoiceDto, true);
 	}
 
+    @RolesAllowed({"stockmanager-admins"})
 	@DeleteMapping("/{code}")
 	@ResponseStatus(value = HttpStatus.OK)
 	public void remove(@PathVariable String code){
@@ -74,6 +82,7 @@ public class BrokerageController {
 		service.remove(code);
 	}
 	
+    @RolesAllowed({"stockmanager-users", "stockmanager-admins"})
 	@GetMapping("/{code}")
 	@ResponseStatus(value = HttpStatus.OK)
 	public Optional<InvoiceDto> invoice(@PathVariable String code){
