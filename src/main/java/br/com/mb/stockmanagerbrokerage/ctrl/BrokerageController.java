@@ -1,13 +1,16 @@
 package br.com.mb.stockmanagerbrokerage.ctrl;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 
+import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,65 +32,73 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/v1")
 @CrossOrigin("*")
 public class BrokerageController {
-   
-    @Autowired
-    private InvoiceService service;
-    
-    @RolesAllowed({"stockmanager-users", "stockmanager-admins"})
+
+	@Autowired
+	private InvoiceService service;
+
+	@RolesAllowed({ "stockmanager-users", "stockmanager-admins" })
 	@GetMapping("/")
-	public List<InvoiceDto> listAll(){
-		
-		List<InvoiceDto> invoices = service.listAll();
+	public List<InvoiceDto> listAll() {
+
+		List<InvoiceDto> invoices = service.listAll(getUsername());
 
 		log.debug(invoices.toString());
 		return invoices;
 	}
-	
-    @RolesAllowed({"stockmanager-users", "stockmanager-admins"})
+
+	@RolesAllowed({ "stockmanager-users", "stockmanager-admins" })
 	@GetMapping("/filter/year/{year}")
-	public List<InvoiceDto> listByYear(@PathVariable Integer year){
-		log.debug("Year: "+ year);
-		
-		//TODO: filters
-		List<InvoiceDto> invoices = service.listAll();
+	public List<InvoiceDto> listByYear(@PathVariable Integer year) {
+		log.debug("Year: " + year);
+
+		// TODO: filters
+		List<InvoiceDto> invoices = service.listAll(getUsername());
 		log.debug(invoices.toString());
 		return invoices;
 	}
-	
-    @RolesAllowed({"stockmanager-users", "stockmanager-admins"})
+
+	@RolesAllowed({ "stockmanager-users", "stockmanager-admins" })
 	@PostMapping(value = "/")
 	@ResponseStatus(value = HttpStatus.CREATED)
-	public void add(@Valid @RequestBody InvoiceDto invoiceDto){
-		log.debug("InvoiceDto: "+ invoiceDto);
-		Optional<InvoiceDto> invoiceRet = service.storeinvoice(invoiceDto, false);
+	public void add(@Valid @RequestBody InvoiceDto invoiceDto) {
+		log.debug("InvoiceDto: " + invoiceDto);
+		Optional<InvoiceDto> invoiceRet = service.storeinvoice(invoiceDto, false, getUsername());
 		if (invoiceRet.isEmpty()) {
 			throw new ResponseStatusException(HttpStatus.SEE_OTHER, "Already exists!");
 		}
 	}
-	
-    @RolesAllowed({"stockmanager-users", "stockmanager-admins"})
+
+	@RolesAllowed({ "stockmanager-users", "stockmanager-admins" })
 	@PutMapping(value = "/")
 	@ResponseStatus(value = HttpStatus.OK)
-	public void overwrite(@Valid @RequestBody InvoiceDto invoiceDto){
-		log.debug("InvoiceDto: "+ invoiceDto);
-		service.storeinvoice(invoiceDto, true);
+	public void overwrite(@Valid @RequestBody InvoiceDto invoiceDto) {
+		log.debug("InvoiceDto: " + invoiceDto);
+		service.storeinvoice(invoiceDto, true, getUsername());
 	}
 
-    @RolesAllowed({"stockmanager-admins"})
+	@RolesAllowed({ "stockmanager-admins" })
 	@DeleteMapping("/{code}")
 	@ResponseStatus(value = HttpStatus.OK)
-	public void remove(@PathVariable String code){
-		log.debug("Code: "+ code);
-		
-		service.remove(code);
+	public void remove(@PathVariable String code) {
+		log.debug("Code: " + code);
+
+		service.remove(code, getUsername());
 	}
-	
-    @RolesAllowed({"stockmanager-users", "stockmanager-admins"})
+
+	@RolesAllowed({ "stockmanager-users", "stockmanager-admins" })
 	@GetMapping("/{code}")
 	@ResponseStatus(value = HttpStatus.OK)
-	public Optional<InvoiceDto> invoice(@PathVariable String code){
-		log.debug("Code: "+ code);
-		
-		return service.getInvoice(code);
+	public Optional<InvoiceDto> invoice(@PathVariable String code) {
+		log.debug("Code: " + code);
+
+		return service.getInvoice(code, getUsername());
+	}
+
+	private String getUsername() {
+		KeycloakAuthenticationToken authentication = (KeycloakAuthenticationToken) SecurityContextHolder.getContext()
+				.getAuthentication();
+
+		Principal principal = (Principal) authentication.getPrincipal();
+		return principal.getName();
 	}
 }

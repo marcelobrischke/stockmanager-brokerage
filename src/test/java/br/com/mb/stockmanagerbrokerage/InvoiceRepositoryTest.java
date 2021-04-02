@@ -28,9 +28,9 @@ class InvoiceRepositoryTest {
     void testFindByCode() throws ParseException {
 
     	SimpleDateFormat sdfDate = new SimpleDateFormat("dd/MM/yyyy");
-        entityManager.persist(new Invoice("test", sdfDate.parse("01/01/2017"), "BUY", "TEST3", 2896, new BigDecimal("24.69")));
+        entityManager.persist(new Invoice("test", sdfDate.parse("01/01/2017"), "BUY", "TEST3", 2896, new BigDecimal("24.69"), "testuser"));
 
-        Optional<Invoice> invoice = repository.findByCode("test");
+        Optional<Invoice> invoice = repository.findByCodeAndOwner("test", "testuser");
         assertEquals(true, invoice.isPresent());
         assertEquals("test", invoice.get().getCode());
     }

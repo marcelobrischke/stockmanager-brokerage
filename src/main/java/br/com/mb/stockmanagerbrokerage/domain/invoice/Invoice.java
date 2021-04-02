@@ -35,9 +35,11 @@ public class Invoice {
 	@NotNull
 	private BigDecimal unitaryValue;
 	// TODO: include additional secondary data
+	@NotNull
+	private String owner;
 
 	public Invoice(String code, Date operationDate, String operation, String symbol, Integer quantity,
-			BigDecimal unitaryValue) {
+			BigDecimal unitaryValue, String owner) {
 		super();
 		this.code = code;
 		this.operationDate = operationDate;
@@ -45,6 +47,7 @@ public class Invoice {
 		this.symbol = symbol;
 		this.quantity = quantity;
 		this.unitaryValue = unitaryValue;
+		this.owner = owner;
 	}
 	
 	

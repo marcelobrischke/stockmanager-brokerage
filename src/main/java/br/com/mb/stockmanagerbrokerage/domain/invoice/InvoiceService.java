@@ -19,8 +19,8 @@ public class InvoiceService {
 	@Autowired
 	private InvoiceRepository repository;
 
-	public List<InvoiceDto> listAll() {
-		Iterable<Invoice> invoices = repository.findAll();
+	public List<InvoiceDto> listAll(String username) {
+		Iterable<Invoice> invoices = repository.findByOwner(username);
 		List<InvoiceDto> invoicesDto = new ArrayList<>();
 		for (Invoice invoice : invoices) {
 
@@ -31,15 +31,15 @@ public class InvoiceService {
 		return invoicesDto;
 	}
 
-	public Optional<InvoiceDto> getInvoice(String code) {
-		return repository.findByCode(code)
+	public Optional<InvoiceDto> getInvoice(String code, String username) {
+		return repository.findByCodeAndOwner(code, username)
 				.map(invoice -> new InvoiceDto(invoice.getCode(), invoice.getOperationDate(),
 						invoice.getOperation(), invoice.getSymbol(), invoice.getQuantity(), invoice.getUnitaryValue()));
 	}
 
-	public Optional<InvoiceDto> storeinvoice(InvoiceDto invoiceDto, boolean overrideIfExists) {
+	public Optional<InvoiceDto> storeinvoice(InvoiceDto invoiceDto, boolean overrideIfExists, String username) {
 		//TODO: improve all this methpd code below, it is messy, but works
-		Optional<Invoice> invoiceStored = repository.findByCode(invoiceDto.getCode());
+		Optional<Invoice> invoiceStored = repository.findByCodeAndOwner(invoiceDto.getCode(), username);
 
 		Invoice invoice;
 		if (invoiceStored.isPresent()) {
@@ -57,6 +57,7 @@ public class InvoiceService {
 			log.debug("is not present, will create");
 			invoice = new Invoice();
 			BeanUtils.copyProperties(invoiceDto, invoice);
+			invoice.setOwner(username);
 			invoice = repository.save(invoice);
 			return invoiceToDto(invoice);
 		}
@@ -68,7 +69,8 @@ public class InvoiceService {
 		return Optional.of(invoiceDto);
 	}
 	
-	public void remove(String code) {
+	public void remove(String code, String username) {
+		//TODO: filter delete to just code owned by username
 		repository.deleteByCode(code);
 	}
 }
