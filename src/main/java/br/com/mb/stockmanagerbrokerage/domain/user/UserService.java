@@ -1,8 +1,9 @@
 package br.com.mb.stockmanagerbrokerage.domain.user;
 
-import java.security.Principal;
-
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
+import org.keycloak.representations.AccessToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -10,10 +11,13 @@ import org.springframework.stereotype.Service;
 public class UserService {
 	
 	public String getUsername() {
-		KeycloakAuthenticationToken authentication = (KeycloakAuthenticationToken) SecurityContextHolder.getContext()
+		KeycloakAuthenticationToken token = (KeycloakAuthenticationToken) SecurityContextHolder.getContext()
 				.getAuthentication();
 
-		Principal principal = (Principal) authentication.getPrincipal();
-		return principal.getName();
+		KeycloakPrincipal principal = (KeycloakPrincipal) token.getPrincipal();
+		KeycloakSecurityContext session = principal.getKeycloakSecurityContext();
+		AccessToken accessToken = session.getToken();
+		String username = accessToken.getPreferredUsername();
+		return username;
 	}
 }

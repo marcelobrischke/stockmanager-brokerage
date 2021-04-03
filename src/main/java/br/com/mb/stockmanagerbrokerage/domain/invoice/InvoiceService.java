@@ -24,7 +24,8 @@ public class InvoiceService {
 	private UserService userService;
 
 	public List<InvoiceDto> listAll() {
-		Iterable<Invoice> invoices = repository.findByOwner(userService.getUsername());
+		log.debug("User: " +userService.getUsername());
+		Iterable<Invoice> invoices = repository.findAllByOwner(userService.getUsername());
 		List<InvoiceDto> invoicesDto = new ArrayList<>();
 		for (Invoice invoice : invoices) {
 
@@ -36,12 +37,14 @@ public class InvoiceService {
 	}
 
 	public Optional<InvoiceDto> getInvoice(String code) {
+		log.debug("User: " +userService.getUsername());
 		return repository.findByCodeAndOwner(code, userService.getUsername())
 				.map(invoice -> new InvoiceDto(invoice.getCode(), invoice.getOperationDate(),
 						invoice.getOperation(), invoice.getSymbol(), invoice.getQuantity(), invoice.getUnitaryValue()));
 	}
 
 	public Optional<InvoiceDto> storeInvoiceNoOverrideIfExists(InvoiceDto invoiceDto) {
+		log.debug("User: " +userService.getUsername());
 		Optional<Invoice> invoiceStored = repository.findByCodeAndOwner(invoiceDto.getCode(), userService.getUsername());
 
 		Invoice invoice;
@@ -60,6 +63,7 @@ public class InvoiceService {
 	}
 	
 	public Optional<InvoiceDto> storeInvoiceOverrideIfExists(InvoiceDto invoiceDto) {
+		log.debug("User: " +userService.getUsername());
 		Optional<Invoice> invoiceStored = repository.findByCodeAndOwner(invoiceDto.getCode(), userService.getUsername());
 
 		Invoice invoice;
@@ -85,7 +89,8 @@ public class InvoiceService {
 	}
 	
 	public void remove(String code) {
-		//TODO: filter delete to just code owned by username
-		repository.deleteByCode(code);
+		log.debug("User: " +userService.getUsername());
+		Optional<Invoice> invoice = repository.findByCodeAndOwner(code, userService.getUsername());
+		if (invoice.isPresent()) repository.delete(invoice.get());
 	}
 }

@@ -50,7 +50,7 @@ class WebTest {
 	void listAll() throws Exception {
 		String token = mock.getAccessToken(aTokenConfig().withRealmRole("stockmanager-app-users").withResourceRole("stockmanager-backend", "stockmanager-users").build());
 		this.mockMvc
-				.perform(get("/v1/")
+				.perform(get("/invoice/")
 				.header("Authorization", "Bearer " + token))
 				.andDo(print()).andExpect(status().isOk()).andExpect(content().string(startsWith("[")))
 				.andExpect(content().string(endsWith("]")));
@@ -59,15 +59,15 @@ class WebTest {
 	@Test
 	void listByYear() throws Exception {
 		String token = mock.getAccessToken(aTokenConfig().withRealmRole("stockmanager-app-users").withResourceRole("stockmanager-backend", "stockmanager-users").build());
-		this.mockMvc.perform(get("/v1/filter/year/2020").header("Authorization", "Bearer " + token)).andDo(print()).andExpect(status().isOk())
+		this.mockMvc.perform(get("/invoice/filter/year/2020").header("Authorization", "Bearer " + token)).andDo(print()).andExpect(status().isOk())
 				.andExpect(content().string(startsWith("["))).andExpect(content().string(endsWith("]")));
 		// TODO : pending filter
 	}
 
 	@Test
 	void insert() throws Exception {
-		String token = mock.getAccessToken(aTokenConfig().withRealmRole("stockmanager-app-users").withResourceRole("stockmanager-backend", "stockmanager-users").build());
-		String tokenAdmin = mock.getAccessToken(aTokenConfig().withRealmRole("stockmanager-app-admins").withResourceRole("stockmanager-backend", "stockmanager-admins").build());
+		String token = mock.getAccessToken(aTokenConfig().withRealmRole("stockmanager-app-users").withResourceRole("stockmanager-backend", "stockmanager-users").withPreferredUsername("testUser").build());
+		String tokenAdmin = mock.getAccessToken(aTokenConfig().withRealmRole("stockmanager-app-admins").withResourceRole("stockmanager-backend", "stockmanager-admins").withPreferredUsername("testAdmin").build());
 		// given
 		String code = "new";
 		String symbol = "SYMB3";
@@ -79,23 +79,23 @@ class WebTest {
 		// when
 
 		// then
-		mockMvc.perform(MockMvcRequestBuilders.delete("/v1/" + code).header("Authorization", "Bearer " + tokenAdmin).contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(MockMvcRequestBuilders.delete("/invoice/" + code).header("Authorization", "Bearer " + tokenAdmin).contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/v1/").header("Authorization", "Bearer " + token).content(asJsonString(invoice))
+		mockMvc.perform(MockMvcRequestBuilders.post("/invoice/").header("Authorization", "Bearer " + token).content(asJsonString(invoice))
 				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated());
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/v1/" + code).header("Authorization", "Bearer " + token).contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(MockMvcRequestBuilders.get("/invoice/" + code).header("Authorization", "Bearer " + token).contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(MockMvcResultMatchers.jsonPath("$.symbol").exists())
 				.andExpect(MockMvcResultMatchers.jsonPath("$.symbol", is(symbol)));
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/v1/").header("Authorization", "Bearer " + token).content(asJsonString(invoiceNotNew))
+		mockMvc.perform(MockMvcRequestBuilders.post("/invoice/").header("Authorization", "Bearer " + token).content(asJsonString(invoiceNotNew))
 				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isSeeOther());
 
-		mockMvc.perform(MockMvcRequestBuilders.put("/v1/").header("Authorization", "Bearer " + token).content(asJsonString(invoiceNotNew))
+		mockMvc.perform(MockMvcRequestBuilders.put("/invoice/").header("Authorization", "Bearer " + token).content(asJsonString(invoiceNotNew))
 				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 	}
 
