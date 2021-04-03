@@ -1,16 +1,13 @@
 package br.com.mb.stockmanagerbrokerage.ctrl;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 
-import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +37,7 @@ public class BrokerageController {
 	@GetMapping("/")
 	public List<InvoiceDto> listAll() {
 
-		List<InvoiceDto> invoices = service.listAll(getUsername());
+		List<InvoiceDto> invoices = service.listAll();
 
 		log.debug(invoices.toString());
 		return invoices;
@@ -52,7 +49,7 @@ public class BrokerageController {
 		log.debug("Year: " + year);
 
 		// TODO: filters
-		List<InvoiceDto> invoices = service.listAll(getUsername());
+		List<InvoiceDto> invoices = service.listAll();
 		log.debug(invoices.toString());
 		return invoices;
 	}
@@ -62,7 +59,7 @@ public class BrokerageController {
 	@ResponseStatus(value = HttpStatus.CREATED)
 	public void add(@Valid @RequestBody InvoiceDto invoiceDto) {
 		log.debug("InvoiceDto: " + invoiceDto);
-		Optional<InvoiceDto> invoiceRet = service.storeinvoice(invoiceDto, false, getUsername());
+		Optional<InvoiceDto> invoiceRet = service.storeInvoiceNoOverrideIfExists(invoiceDto);
 		if (invoiceRet.isEmpty()) {
 			throw new ResponseStatusException(HttpStatus.SEE_OTHER, "Already exists!");
 		}
@@ -73,7 +70,7 @@ public class BrokerageController {
 	@ResponseStatus(value = HttpStatus.OK)
 	public void overwrite(@Valid @RequestBody InvoiceDto invoiceDto) {
 		log.debug("InvoiceDto: " + invoiceDto);
-		service.storeinvoice(invoiceDto, true, getUsername());
+		service.storeInvoiceOverrideIfExists(invoiceDto);
 	}
 
 	@RolesAllowed({ "stockmanager-admins" })
@@ -82,7 +79,7 @@ public class BrokerageController {
 	public void remove(@PathVariable String code) {
 		log.debug("Code: " + code);
 
-		service.remove(code, getUsername());
+		service.remove(code);
 	}
 
 	@RolesAllowed({ "stockmanager-users", "stockmanager-admins" })
@@ -91,14 +88,6 @@ public class BrokerageController {
 	public Optional<InvoiceDto> invoice(@PathVariable String code) {
 		log.debug("Code: " + code);
 
-		return service.getInvoice(code, getUsername());
-	}
-
-	private String getUsername() {
-		KeycloakAuthenticationToken authentication = (KeycloakAuthenticationToken) SecurityContextHolder.getContext()
-				.getAuthentication();
-
-		Principal principal = (Principal) authentication.getPrincipal();
-		return principal.getName();
+		return service.getInvoice(code);
 	}
 }

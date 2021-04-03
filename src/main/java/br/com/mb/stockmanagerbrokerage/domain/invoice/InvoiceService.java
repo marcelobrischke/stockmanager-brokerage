@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.com.mb.stockmanagerbrokerage.domain.user.UserService;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -18,9 +19,12 @@ public class InvoiceService {
 
 	@Autowired
 	private InvoiceRepository repository;
+	
+	@Autowired
+	private UserService userService;
 
-	public List<InvoiceDto> listAll(String username) {
-		Iterable<Invoice> invoices = repository.findByOwner(username);
+	public List<InvoiceDto> listAll() {
+		Iterable<Invoice> invoices = repository.findByOwner(userService.getUsername());
 		List<InvoiceDto> invoicesDto = new ArrayList<>();
 		for (Invoice invoice : invoices) {
 
@@ -31,36 +35,47 @@ public class InvoiceService {
 		return invoicesDto;
 	}
 
-	public Optional<InvoiceDto> getInvoice(String code, String username) {
-		return repository.findByCodeAndOwner(code, username)
+	public Optional<InvoiceDto> getInvoice(String code) {
+		return repository.findByCodeAndOwner(code, userService.getUsername())
 				.map(invoice -> new InvoiceDto(invoice.getCode(), invoice.getOperationDate(),
 						invoice.getOperation(), invoice.getSymbol(), invoice.getQuantity(), invoice.getUnitaryValue()));
 	}
 
-	public Optional<InvoiceDto> storeinvoice(InvoiceDto invoiceDto, boolean overrideIfExists, String username) {
-		//TODO: improve all this methpd code below, it is messy, but works
-		Optional<Invoice> invoiceStored = repository.findByCodeAndOwner(invoiceDto.getCode(), username);
+	public Optional<InvoiceDto> storeInvoiceNoOverrideIfExists(InvoiceDto invoiceDto) {
+		Optional<Invoice> invoiceStored = repository.findByCodeAndOwner(invoiceDto.getCode(), userService.getUsername());
 
 		Invoice invoice;
 		if (invoiceStored.isPresent()) {
 			log.debug("isPresent, stored:"+ invoiceStored.toString());
-			if (overrideIfExists) {
-				log.debug("will override");
-				BeanUtils.copyProperties(invoiceDto, invoiceStored);
-				invoice = repository.save(invoiceStored.get());
-				return invoiceToDto(invoice);
-			} else {
-				log.debug("return without override");
-				return Optional.empty();
-			}
+			log.debug("return without override");
+			return Optional.empty();
 		} else {
-			log.debug("is not present, will create");
+			log.debug("it is not present, will create");
 			invoice = new Invoice();
 			BeanUtils.copyProperties(invoiceDto, invoice);
-			invoice.setOwner(username);
+			invoice.setOwner(userService.getUsername());
 			invoice = repository.save(invoice);
 			return invoiceToDto(invoice);
 		}
+	}
+	
+	public Optional<InvoiceDto> storeInvoiceOverrideIfExists(InvoiceDto invoiceDto) {
+		Optional<Invoice> invoiceStored = repository.findByCodeAndOwner(invoiceDto.getCode(), userService.getUsername());
+
+		Invoice invoice;
+		if (invoiceStored.isPresent()) {
+			log.debug("isPresent, stored:"+ invoiceStored.toString());
+			log.debug("will override");
+			BeanUtils.copyProperties(invoiceDto, invoiceStored);
+			invoice = repository.save(invoiceStored.get());
+		} else {
+			log.debug("it is not present, will create");
+			invoice = new Invoice();
+			BeanUtils.copyProperties(invoiceDto, invoice);
+			invoice.setOwner(userService.getUsername());
+			invoice = repository.save(invoice);
+		}
+		return invoiceToDto(invoice);
 	}
 
 	private Optional<InvoiceDto> invoiceToDto(Invoice invoice) {
@@ -69,7 +84,7 @@ public class InvoiceService {
 		return Optional.of(invoiceDto);
 	}
 	
-	public void remove(String code, String username) {
+	public void remove(String code) {
 		//TODO: filter delete to just code owned by username
 		repository.deleteByCode(code);
 	}
