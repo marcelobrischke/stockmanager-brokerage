@@ -76,10 +76,8 @@ class WebTest {
 		InvoiceDto invoiceNotNew = new InvoiceDto(code, sdfDate.parse("01/01/2017"), "BUY", symbol, 2896,
 				new BigDecimal("24.69"));
 
-		// when
-
-		// then
-		mockMvc.perform(MockMvcRequestBuilders.delete("/invoice/" + code).header("Authorization", "Bearer " + tokenAdmin).contentType(MediaType.APPLICATION_JSON)
+		//TODO: verify all attributes
+		mockMvc.perform(MockMvcRequestBuilders.delete("/invoice/" + code).header("Authorization", "Bearer " + token).contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
 		mockMvc.perform(MockMvcRequestBuilders.post("/invoice/").header("Authorization", "Bearer " + token).content(asJsonString(invoice))
@@ -93,7 +91,7 @@ class WebTest {
 
 		mockMvc.perform(MockMvcRequestBuilders.post("/invoice/").header("Authorization", "Bearer " + token).content(asJsonString(invoiceNotNew))
 				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isSeeOther());
+				.andExpect(status().isAccepted());
 
 		mockMvc.perform(MockMvcRequestBuilders.put("/invoice/").header("Authorization", "Bearer " + token).content(asJsonString(invoiceNotNew))
 				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());

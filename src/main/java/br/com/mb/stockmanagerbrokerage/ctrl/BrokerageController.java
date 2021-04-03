@@ -61,7 +61,7 @@ public class BrokerageController {
 		log.debug("InvoiceDto: " + invoiceDto);
 		Optional<InvoiceDto> invoiceRet = service.storeInvoiceNoOverrideIfExists(invoiceDto);
 		if (invoiceRet.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.SEE_OTHER, "Already exists!");
+			throw new ResponseStatusException(HttpStatus.ACCEPTED, "Already exists!");
 		}
 	}
 
@@ -73,7 +73,7 @@ public class BrokerageController {
 		service.storeInvoiceOverrideIfExists(invoiceDto);
 	}
 
-	@RolesAllowed({ "stockmanager-admins" })
+	@RolesAllowed({ "stockmanager-users", "stockmanager-admins" })
 	@DeleteMapping("/{code}")
 	@ResponseStatus(value = HttpStatus.OK)
 	public void remove(@PathVariable String code) {
@@ -87,7 +87,10 @@ public class BrokerageController {
 	@ResponseStatus(value = HttpStatus.OK)
 	public Optional<InvoiceDto> invoice(@PathVariable String code) {
 		log.debug("Code: " + code);
-
-		return service.getInvoice(code);
+		Optional<InvoiceDto> invoiceRet = service.getInvoice(code);
+		if (invoiceRet.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.NO_CONTENT);
+		}
+		return invoiceRet;
 	}
 }

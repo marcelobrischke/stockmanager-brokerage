@@ -70,8 +70,9 @@ public class InvoiceService {
 		if (invoiceStored.isPresent()) {
 			log.debug("isPresent, stored:"+ invoiceStored.toString());
 			log.debug("will override");
-			BeanUtils.copyProperties(invoiceDto, invoiceStored);
-			invoice = repository.save(invoiceStored.get());
+			invoice = invoiceStored.get();
+			BeanUtils.copyProperties(invoiceDto, invoice);
+			invoice = repository.save(invoice);
 		} else {
 			log.debug("it is not present, will create");
 			invoice = new Invoice();
