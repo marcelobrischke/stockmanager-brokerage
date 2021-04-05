@@ -28,6 +28,14 @@ keycloak:
     use-resource-role-mappings: true
     bearer-only: true
 logging:
-  level:
-    root: INFO
-    org.springframework: INFO
+    level:
+        root: INFO
+        org.springframework: INFO
+        br.com.mb: DEBUG
+    logstash:
+        enabled: true
+        url: wsl.local:5000
+        #trustStoreLocation: /tmp/location/sample.jks
+        #trustStorePassword: 123456
+        ignorePatterns: /(actuator|swagger|webjars).*
+        logHeaders: true
