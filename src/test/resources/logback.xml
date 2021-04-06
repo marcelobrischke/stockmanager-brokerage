@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration>
+
+<configuration scan="true">
+
+	<appender name="STDOUT"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder 
+			by default -->
+		<encoder>
+			<pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n
+			</pattern>
+		</encoder>
+	</appender>
+	
+	<appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <param name="Encoding" value="UTF-8"/>
+
+        <!--    should be an env variable in production    -->
+        <remoteHost>wsl.local</remoteHost>
+
+        <!--    should be an env variable in production    -->
+        <port>5000</port>
+
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"app_name":"stockmanager-brokerage", "app_port": "8081"}</customFields>
+        </encoder>
+    </appender>
+    
+	<logger name="br.com.mb" level="debug" additivity="false">
+        <appender-ref ref="STDOUT"/>
+<!--         <appender-ref ref="logstash"/> -->
+    </logger>
+    
+	<root level="info">
+		<appender-ref ref="STDOUT" />
+<!--         <appender-ref ref="logstash"/> -->
+	</root>
+</configuration>
