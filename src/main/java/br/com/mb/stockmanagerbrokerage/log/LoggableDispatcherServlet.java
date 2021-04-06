@@ -1,4 +1,4 @@
-package br.com.mb.stockmanagerbrokerage;
+package br.com.mb.stockmanagerbrokerage.log;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
