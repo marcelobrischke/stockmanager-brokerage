@@ -6,5 +6,5 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface  InvoiceRepository  extends CrudRepository<Invoice, Long> {
 	Optional<Invoice> findByCodeAndOwner(String code, String owner);
-	Iterable<Invoice> findAllByOwner(String owner);
+	Iterable<Invoice> findAllByOwnerOrderByOperationDateAsc(String owner);
 }

@@ -14,6 +14,16 @@ spring:
         show-sql: true
         hibernate:
             ddl-auto: update
+    kafka:
+        #bootstrapAddress: wsl.local:9092
+        producer:
+            bootstrap-servers: wsl.local:9092
+            key-serializer: org.apache.kafka.common.serialization.StringSerializer
+            value-serializer: org.apache.kafka.common.serialization.StringSerializer
+            retries: 1
+            #value-serializer: org.springframework.kafka.support.serializer.JsonSerializer    
+#            properties:
+#                spring.json.add.type.headers: false             
 server:
     port: 8081
 eureka:
@@ -35,6 +45,7 @@ keycloak:
     resource: stockmanager-backend
     use-resource-role-mappings: true
     bearer-only: true
+    
 logging:
     level:
         root: INFO

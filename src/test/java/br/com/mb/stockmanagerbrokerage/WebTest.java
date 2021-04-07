@@ -28,7 +28,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tngtech.keycloakmock.junit5.KeycloakMockExtension;
@@ -38,9 +37,10 @@ import br.com.mb.stockmanagerbrokerage.domain.invoice.InvoiceDto;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+//@EmbeddedKafka(topics = {"invoiceAdd", "invoiceReset"})
 //@Transactional
 class WebTest {
-
+	
 	private static final SimpleDateFormat sdfDate = new SimpleDateFormat("dd/MM/yyyy");
 	@RegisterExtension
 	static KeycloakMockExtension mock = new KeycloakMockExtension(
@@ -61,6 +61,7 @@ class WebTest {
 	
 	@BeforeAll
 	static void init() throws Exception {
+		
 		token = mock.getAccessToken(aTokenConfig().withRealmRole("stockmanager-app-users").withResourceRole("stockmanager-backend", "stockmanager-users").withPreferredUsername("testUser").build());
 		tokenAdmin = mock.getAccessToken(aTokenConfig().withRealmRole("stockmanager-app-admins").withResourceRole("stockmanager-backend", "stockmanager-admins").withPreferredUsername("testAdmin").build());
 		
